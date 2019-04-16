@@ -10,7 +10,7 @@ Built on [Omnitone](https://github.com/GoogleChrome/omnitone).
 ### API
 
 | Property | Description | Default Value | Values |
-| -------- | ----------- | ------------- |
+| -------- | ----------- | ------------- | ------ |
 | `src`    | The source of the audio. This can be a [HTMLMediaElement] (`<audio />` or `<video />`), an ID string pointing to a [HTMLMediaElement] or a resouce string. | |
 | `loop` | Whether to loop the element source. Overwrites the value set by the input element. | true | |
 | `autoplay` | Whether to autoplay the element source. Overwrites the value set by the input element. | true | |
