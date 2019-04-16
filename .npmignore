@@ -3,6 +3,7 @@
 config
 examples
 tests
+gh-pages
 .editorconfig
 .eslintrc.js
 .gitattributes

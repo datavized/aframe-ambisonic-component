@@ -3,7 +3,7 @@ const config = require('./webpack-prod');
 
 module.exports = merge(config, {
 	output: {
-		filename: 'aframe-component-ambisonic-no-omnitone.min.js'
+		filename: 'aframe-ambisonic-component-no-omnitone.min.js'
 	},
 	externals: {
 		omnitone: 'Omnitone'
