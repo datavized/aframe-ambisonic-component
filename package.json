@@ -1,0 +1,63 @@
+{
+	"name": "aframe-ambisonic-component",
+	"version": "0.1.0",
+	"description": "A Ambisonic Audio component for A-Frame.",
+	"main": "src/index.js",
+	"unpkg": "dist/aframe-ambisonic-component.min.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/datavized/aframe-ambisonic-component.git"
+	},
+	"keywords": [
+		"aframe",
+		"aframe-component",
+		"aframe-vr",
+		"vr",
+		"webvr",
+		"omnitone",
+		"ambisonic",
+		"audio",
+		"sound"
+	],
+	"author": "Brian Chirls <brian@datavized.com>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/datavized/aframe-ambisonic-component/issues"
+	},
+	"homepage": "https://github.com/datavized/aframe-ambisonic-component#readme",
+	"scripts": {
+		"start": "webpack-dev-server --config ./config/webpack-dev.js --mode development --progress --colors",
+		"build": "rm -irf build/ && webpack --config ./config/webpack-prod.js --mode production && webpack --config ./config/webpack-prod-no-omnitone.js --mode production",
+		"gh-pages": "git subtree push --prefix examples github/datavized gh-pages",
+		"lint": "eslint ./; true",
+		"lint-fix": "eslint --fix ./; true",
+		"prepublishOnly": "npm run dist"
+	},
+	"dependencies": {
+		"omnitone": "^1.3.0"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.4.3",
+		"@babel/plugin-proposal-class-properties": "^7.4.0",
+		"@babel/plugin-proposal-object-rest-spread": "^7.4.3",
+		"@babel/plugin-syntax-dynamic-import": "^7.2.0",
+		"@babel/plugin-transform-runtime": "^7.4.3",
+		"@babel/polyfill": "^7.4.3",
+		"@babel/preset-env": "^7.4.3",
+		"aframe": "*",
+		"babel-eslint": "^10.0.1",
+		"babel-loader": "^8.0.5",
+		"datavized-code-style": "github:datavized/code-style",
+		"eslint": "^5.16.0",
+		"eslint-config-crockford": "^2.0.0",
+		"eslint-loader": "^2.1.2",
+		"eslint-plugin-import": "^2.17.1",
+		"eslint-plugin-node": "^8.0.0",
+		"eslint-plugin-promise": "^4.0.1",
+		"fast-async": "^6.3.8",
+		"webpack": "^4.30.0",
+		"webpack-cli": "^3.3.0",
+		"webpack-dev-server": "^3.2.1",
+		"webpack-merge": "^4.2.1"
+	}
+}
