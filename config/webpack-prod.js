@@ -16,5 +16,6 @@ module.exports = merge(common, {
 		path: path.join(__dirname, '../build'),
 		filename: 'aframe-component-ambisonic.min.js'
 	},
-	plugins: PLUGINS
+	plugins: PLUGINS,
+	devtool: 'source-map'
 });

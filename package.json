@@ -28,7 +28,7 @@
 	"scripts": {
 		"start": "webpack-dev-server --config ./config/webpack-dev.js --mode development --progress --colors",
 		"build": "rm -irf build/ && webpack --config ./config/webpack-prod.js --mode production && webpack --config ./config/webpack-prod-no-omnitone.js --mode production",
-		"gh-pages": "git subtree push --prefix examples github/datavized gh-pages",
+		"gh-pages": "webpack --config ./config/webpack-prod.js --mode production -o examples/aframe-ambisonic-component.js && git subtree push --prefix examples origin gh-pages && rm examples/aframe-ambisonic-component.*",
 		"lint": "eslint ./; true",
 		"lint-fix": "eslint --fix ./; true",
 		"prepublishOnly": "npm run build"
