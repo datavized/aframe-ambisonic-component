@@ -1,0 +1,15 @@
+#controls {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	padding: 16px;
+	display: flex;
+	justify-content: center;
+}
+
+#controls > button {
+	margin: 16px;
+	padding: 8px;
+	font-size: 1.4em;
+}
