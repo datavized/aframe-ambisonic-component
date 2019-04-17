@@ -4,7 +4,6 @@
 		<meta charset="utf-8">
 		<title>Spherical Video - Fuerza Imprevista | A-Frame Ambisonic Audio Component</title>
 		<script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
-		<script src="https://unpkg.com/aframe-stereo-component@0.6.0/dist/aframe-stereo-component.js"></script>
 		<script src="../aframe-ambisonic-component.js"></script>
 		<script src="../scripts/play-on-vrdisplayactivate-or-enter-vr.js"></script>
 		<link rel="stylesheet" href="../assets/controls.css"/>
@@ -19,8 +18,6 @@
 				<video
 					id="video"
 					style="display: none"
-					playsinline
-					webkit-playsinline
 					crossorigin="anonymous"
 				>
 					<source src="https://storage.googleapis.com/omnitone-demo.google.com.a.appspot.com/fuerza-imprevista-1080p-vp9-vorbis.webm" type="video/webm"/>
@@ -38,7 +35,7 @@
 			></a-ambisonic>
 
 			<!-- Define camera with zero user height, movement disabled and arrow key rotation added. -->
-			<a-camera user-height="0" wasd-controls-enabled="false" arrow-key-rotation stereocam="eye:left"></a-camera>
+			<a-camera user-height="0" wasd-controls-enabled="false" arrow-key-rotation></a-camera>
 		</a-scene>
 
 		<!-- Controls -->

@@ -1,3 +1,4 @@
+/* global AFRAME */
 AFRAME.registerComponent('hide-once-playing', {
 	schema: {
 		type: 'selector'
@@ -8,9 +9,10 @@ AFRAME.registerComponent('hide-once-playing', {
 		this.onPause = this.onPause.bind(this);
 	},
 	update: function () {
+		var mediaElement;
 		var data = this.data;
 		if (data) {
-			var mediaElement = data.components && data.components.ambisonic && data.components.ambisonic.mediaElement ||
+			mediaElement = data.components && data.components.ambisonic && data.components.ambisonic.mediaElement ||
 				data instanceof window.HTMLMediaElement && data ||
 				null;
 
@@ -46,10 +48,10 @@ AFRAME.registerComponent('hide-once-playing', {
 	pause: function () {
 		this.removeEvents();
 	},
-	onPlaying: function (evt) {
+	onPlaying: function () {
 		this.el.setAttribute('visible', false);
 	},
-	onPause: function (evt) {
+	onPause: function () {
 		this.el.setAttribute('visible', true);
 	}
 });

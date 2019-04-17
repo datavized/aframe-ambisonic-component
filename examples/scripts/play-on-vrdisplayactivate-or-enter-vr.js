@@ -16,14 +16,14 @@ AFRAME.registerComponent('play-on-vrdisplayactivate-or-enter-vr', {
 		setTimeout(this.playMedia);
 	},
 	playMedia: function () {
-		const components = this.el.components;
+		var components = this.el.components;
 		if (components.ambisonic) {
 			components.ambisonic.playSound();
 		} else if (components.sound) {
 			components.sound.playSound();
 		} else if (components.material) {
 			try {
-				const image = components.material.material.map.image;
+				var image = components.material.material.map.image;
 				image.play();
 			} catch (e) {}
 		}

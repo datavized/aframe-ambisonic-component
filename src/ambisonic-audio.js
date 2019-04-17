@@ -16,6 +16,8 @@ function setBooleanAttribute(element, attr, value) {
 	}
 }
 
+const isSafari = false;// /safari/i.test(Omnitone.browserInfo.name);
+const isIOS = false;// /iP(ad|od|hone)/.test(Omnitone.browserInfo.platform);
 const safariChannelMap = ([w, x, y, z]) => [y, w, x, z];
 
 AFRAME.registerComponent('ambisonic', {
@@ -41,8 +43,11 @@ AFRAME.registerComponent('ambisonic', {
 		this.renderer = null;
 		this.audio = null;
 		this.mediaElement = null;
+		this.audioSource = '';
+		this.loader = null;
 
 		this.ownMediaElement = false;
+		this.playing = false;
 
 		// bind any event handling methods
 		this.setCamera = this.setCamera.bind(this);
@@ -141,9 +146,24 @@ AFRAME.registerComponent('ambisonic', {
 					};
 				}
 				this.mediaElement = newMediaElement;
+				this.audioSource = '';
 				this.audio.setMediaElementSource(this.mediaElement);
 			} else {
-				// todo: load buffer
+				// load audio buffer
+
+				let url = src;
+				if (src && typeof src !== 'string' && src instanceof window.HTMLMediaElement) {
+					if (src.tagName.toLowerCase() === 'video') {
+						throw new Error('Unable to load video as audio buffer');
+					}
+					url = src.src || src.srcObject || src.currentSrc;
+				}
+
+				this.audioSource = url;
+				this.cleanMediaAssets();
+				if (this.data.autoplay) {
+					this.loadBuffer();
+				}
 			}
 		}
 
@@ -178,6 +198,18 @@ AFRAME.registerComponent('ambisonic', {
 			}
 			this.mediaElement = null;
 		}
+		if (this.audio) {
+			if (this.audio.isPlaying) {
+				this.audio.stop();
+			}
+			this.audio.source = null;
+			this.audio.buffer = null;
+			this.audio.sourceType = 'empty';
+		}
+		if (this.loader) {
+			this.loader.abort();
+			this.loader = null;
+		}
 	},
 
 	remove() {
@@ -192,28 +224,71 @@ AFRAME.registerComponent('ambisonic', {
 	},
 
 	setCamera(evt) {
-		console.log('setCamera', evt);
 		this.camera = evt.detail.cameraEl.getObject3D('camera');
 	},
 
 	// resume audio context
 	resumeAudioContext() {
-		if (this.context && this.context.resume) {
-			this.context.resume().catch(() => {});
+		if (this.context && this.context.resume && this.context.state === 'suspended') {
+			return this.context.resume().catch(() => {});
 		}
+
+		return Promise.resolve();
+	},
+
+	loadBuffer() {
+		this.resumeAudioContext().then(() => {
+			const url = this.audioSource;
+			if (this.loader || !url) {
+				return;
+			}
+
+			const loader = this.loader = new XMLHttpRequest();
+			loader.responseType = 'arraybuffer';
+			loader.onload = () => {
+				this.context.decodeAudioData(loader.response, audioBuffer => {
+					if (this.audioSource === url && !this.data.useMediaElement) {
+						this.audio.setBuffer(audioBuffer);
+						this.updatePlaybackSettings();
+						if (this.playing) {
+							this.playSound();
+						}
+					}
+				}, error => {
+					this.loader = null;
+					warn('Unable to decode audio source', url, error);
+				});
+			};
+			loader.onerror = evt => {
+				this.loader = null;
+				warn('Unable to load audio source', url, evt, loader);
+			};
+			loader.open('GET', url);
+			loader.send();
+		});
 	},
 
 	// set play state to start when loaded
 	playSound() {
+		this.playing = true;
 		this.resumeAudioContext();
 		if (this.mediaElement) {
-			this.mediaElement.play();
+			const playPromise = this.mediaElement.play();
+			if (playPromise) {
+				playPromise.catch(e => {
+					warn('Unable to play media', e.message);
+				});
+			}
 		} else if (this.audio && !this.audio.isPlaying) {
-			this.audio.play();
+			this.loadBuffer();
+			if (this.audio.buffer) {
+				this.audio.play();
+			}
 		}
 	},
 
 	pauseSound() {
+		this.playing = false;
 		if (this.mediaElement) {
 			this.mediaElement.pause();
 		} else if (this.audio && this.audio.isPlaying) {
@@ -235,12 +310,24 @@ AFRAME.registerComponent('ambisonic', {
 	updateAmbisonicSettings() {
 		if (this.renderer) {
 			const channelMap = this.data.channelMap.map(parseFloat);
+
+			/*
+			Per various documents on the internet, Safari messes up the
+			order of the channels, but that does not seem to be the case.
+			Maybe it's been fixed in a recent version, so this is disabled
+			for now.
+			*/
 			this.renderer.setChannelMap(
-				channelMap.length === 4 && /safari/i.test(Omnitone.browserInfo) ?
+				channelMap.length === 4 && isSafari ?
 					safariChannelMap(channelMap) :
 					channelMap
 			);
-			this.renderer.setRenderingMode(this.data.mode);
+
+			// Mobile Safari cannot decode all the audio channels from a media element
+			const renderingMode = isIOS && this.data.mode === 'ambisonic' ?
+				'bypass' :
+				this.data.mode;
+			this.renderer.setRenderingMode(renderingMode);
 		}
 	},
 
@@ -250,11 +337,14 @@ AFRAME.registerComponent('ambisonic', {
 	updatePlaybackSettings() {
 		if (this.mediaElement) {
 
-			// todo: only if we created this element
-			setBooleanAttribute(this.mediaElement, 'loop', this.data.loop);
-			setBooleanAttribute(this.mediaElement, 'autoplay', this.data.autoplay);
+			// only if we created this element
+			if (this.ownMediaElement) {
+				setBooleanAttribute(this.mediaElement, 'loop', this.data.loop);
+				setBooleanAttribute(this.mediaElement, 'autoplay', this.data.autoplay);
+			}
 		} else if (this.audio) {
 			this.audio.setLoop(this.data.loop);
+			this.audio.autoplay = this.data.autoplay;
 		}
 		// todo: other props like playbackRate, detune, etc.
 	},
