@@ -4,20 +4,22 @@ AFRAME.registerComponent('play-on-window-click', {
 		this.onClick = this.onClick.bind(this);
 	},
 	play: function () {
-		window.addEventListener('click', this.onClick);
+		window.addEventListener('mousedown', this.onClick);
+		document.addEventListener('touchstart', this.onClick);
 	},
 	pause: function () {
-		window.removeEventListener('click', this.onClick);
+		window.removeEventListener('mousedown', this.onClick);
+		document.removeEventListener('touchstart', this.onClick);
 	},
 	onClick: function () {
-		const components = this.el.components;
+		var components = this.el.components;
 		if (components.ambisonic) {
 			components.ambisonic.playSound();
 		} else if (components.sound) {
 			components.sound.playSound();
 		} else if (components.material) {
 			try {
-				const image = components.material.material.map.image;
+				var image = components.material.material.map.image;
 				image.play();
 			} catch (e) {}
 		}

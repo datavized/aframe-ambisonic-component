@@ -1,7 +1,7 @@
 (function () {
-	const video = document.getElementById('video');
-	const playButton = document.getElementById('play');
-	const rewindButton = document.getElementById('rewind');
+	var video = document.getElementById('video');
+	var playButton = document.getElementById('play');
+	var rewindButton = document.getElementById('rewind');
 
 	playButton.addEventListener('click', function () {
 		if (video.paused) {
