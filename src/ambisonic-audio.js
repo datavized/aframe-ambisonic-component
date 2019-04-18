@@ -148,6 +148,7 @@ AFRAME.registerComponent('ambisonic', {
 					newMediaElement.addEventListener('play', this.onPlaySound);
 					newMediaElement.addEventListener('pause', this.onPauseSound);
 					newMediaElement.addEventListener('load', this.onLoadSound);
+					newMediaElement.addEventListener('canplay', this.onLoadSound);
 					newMediaElement.addEventListener('ended', this.onEndSound);
 				}
 
@@ -207,6 +208,7 @@ AFRAME.registerComponent('ambisonic', {
 			this.mediaElement.removeEventListener('play', this.playSound);
 			this.mediaElement.removeEventListener('pause', this.onPauseSound);
 			this.mediaElement.removeEventListener('load', this.onLoadSound);
+			this.mediaElement.removeEventListener('canplay', this.onLoadSound);
 			this.mediaElement.removeEventListener('ended', this.onEndSound);
 			if (this.ownMediaElement) {
 				this.mediaElement.pause();
