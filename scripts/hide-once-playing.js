@@ -8,16 +8,18 @@ AFRAME.registerComponent('hide-once-playing', {
 		this.onPlaying = this.onPlaying.bind(this);
 		this.onPause = this.onPause.bind(this);
 	},
-	update: function () {
+	update: function (oldData) {
 		var mediaElement;
 		var data = this.data;
-		if (data) {
-			mediaElement = data.components && data.components.ambisonic && data.components.ambisonic.mediaElement ||
-				data instanceof window.HTMLMediaElement && data ||
+		if (data.components && data.components.ambisonic) {
+			this.removeEvents(oldData);
+			this.addEvents();
+		} else if (data) {
+			mediaElement = data instanceof window.HTMLMediaElement && data ||
 				null;
 
 			if (this.mediaElement !== mediaElement) {
-				this.removeEvents();
+				this.removeEvents(oldData);
 				this.mediaElement = mediaElement;
 				if (this.isPlaying) {
 					this.addEvents();
@@ -34,12 +36,19 @@ AFRAME.registerComponent('hide-once-playing', {
 			}
 			this.mediaElement.addEventListener('play', this.onPlaying);
 			this.mediaElement.addEventListener('pause', this.onPause);
+		} else if (this.data && this.data.addEventListener) {
+			this.data.addEventListener('sound-play', this.onPlaying);
+			this.data.addEventListener('sound-pause', this.onPause);
 		}
 	},
-	removeEvents: function () {
+	removeEvents: function (target = this.data) {
 		if (this.mediaElement) {
 			this.mediaElement.removeEventListener('play', this.onPlaying);
 			this.mediaElement.removeEventListener('pause', this.onPause);
+		}
+		if (target && target.removeEventListener) {
+			target.removeEventListener('sound-play', this.onPlaying);
+			target.removeEventListener('sound-pause', this.onPause);
 		}
 	},
 	play: function () {
