@@ -28,7 +28,7 @@
 	"scripts": {
 		"start": "webpack-dev-server --config ./config/webpack-dev.js --mode development --progress --colors",
 		"build": "rm -rf build/ && webpack --config ./config/webpack-prod.js --mode production && webpack --config ./config/webpack-prod-no-omnitone.js --mode production",
-		"gh-pages": "./gh-pages.sh",
+		"deploy": "./gh-pages.sh",
 		"lint": "eslint ./; true",
 		"lint-fix": "eslint --fix ./; true",
 		"prepublishOnly": "npm run build"
