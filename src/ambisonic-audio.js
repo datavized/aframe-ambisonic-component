@@ -20,6 +20,15 @@ const isSafari = false;// /safari/i.test(Omnitone.browserInfo.name);
 const isIOS = false;// /iP(ad|od|hone)/.test(Omnitone.browserInfo.platform);
 const safariChannelMap = ([w, x, y, z]) => [y, w, x, z];
 
+const boundMethods = [
+	'setCamera',
+	'onEntityChange',
+	'onLoadSound',
+	'onPlaySound',
+	'onPauseSound',
+	'onEndSound'
+];
+
 AFRAME.registerComponent('ambisonic', {
 	schema: {
 		src: { type: 'audio' },
@@ -50,9 +59,9 @@ AFRAME.registerComponent('ambisonic', {
 		this.playing = false;
 
 		// bind any event handling methods
-		this.setCamera = this.setCamera.bind(this);
-		this.resumeAudioContext = this.resumeAudioContext.bind(this);
-		this.onEntityChange = this.onEntityChange.bind(this);
+		boundMethods.forEach(name => {
+			this[name] = this[name].bind(this);
+		});
 
 		// Update on entity change.
 		this.el.addEventListener('componentchanged', this.onEntityChange);
@@ -125,7 +134,6 @@ AFRAME.registerComponent('ambisonic', {
 				let newMediaElement = null;
 				if (src instanceof window.HTMLMediaElement) {
 					newMediaElement = src;
-					newMediaElement.addEventListener('play', this.resumeAudioContext);
 					this.ownMediaElement = false;
 				} else {
 					newMediaElement = this.mediaElement || document.createElement('audio');
@@ -135,6 +143,12 @@ AFRAME.registerComponent('ambisonic', {
 				}
 				if (this.mediaElement !== newMediaElement) {
 					this.cleanMediaAssets();
+				}
+				if (newMediaElement) {
+					newMediaElement.addEventListener('play', this.onPlaySound);
+					newMediaElement.addEventListener('pause', this.onPauseSound);
+					newMediaElement.addEventListener('load', this.onLoadSound);
+					newMediaElement.addEventListener('ended', this.onEndSound);
 				}
 
 				if (DEBUG && !this.mediaElement && newMediaElement && this.ownMediaElement) {
@@ -190,7 +204,10 @@ AFRAME.registerComponent('ambisonic', {
 	cleanMediaAssets() {
 		// clean up all sound assets
 		if (this.mediaElement) {
-			this.mediaElement.removeEventListener('play', this.resumeAudioContext);
+			this.mediaElement.removeEventListener('play', this.playSound);
+			this.mediaElement.removeEventListener('pause', this.onPauseSound);
+			this.mediaElement.removeEventListener('load', this.onLoadSound);
+			this.mediaElement.removeEventListener('ended', this.onEndSound);
 			if (this.ownMediaElement) {
 				this.mediaElement.pause();
 				this.mediaElement.src = '';
@@ -201,6 +218,9 @@ AFRAME.registerComponent('ambisonic', {
 		if (this.audio) {
 			if (this.audio.isPlaying) {
 				this.audio.stop();
+			}
+			if (this.audio.source) {
+				this.audio.source.removeEventListener('ended', this.onEndSound);
 			}
 			this.audio.source = null;
 			this.audio.buffer = null;
@@ -249,6 +269,7 @@ AFRAME.registerComponent('ambisonic', {
 				this.context.decodeAudioData(loader.response, audioBuffer => {
 					if (this.audioSource === url && !this.data.useMediaElement) {
 						this.audio.setBuffer(audioBuffer);
+						this.onLoadSound();
 						this.updatePlaybackSettings();
 						if (this.playing) {
 							this.playSound();
@@ -283,6 +304,8 @@ AFRAME.registerComponent('ambisonic', {
 			this.loadBuffer();
 			if (this.audio.buffer) {
 				this.audio.play();
+				this.audio.source.addEventListener('ended', this.onEndSound);
+				this.onPlaySound();
 			}
 		}
 	},
@@ -293,6 +316,7 @@ AFRAME.registerComponent('ambisonic', {
 			this.mediaElement.pause();
 		} else if (this.audio && this.audio.isPlaying) {
 			this.audio.pause();
+			this.onPauseSound();
 		}
 	},
 
@@ -301,7 +325,29 @@ AFRAME.registerComponent('ambisonic', {
 			this.mediaElement.pause();
 		} else if (this.audio) {
 			this.audio.stop();
+			this.onPauseSound();
 		}
+	},
+
+	onPlaySound() {
+		this.resumeAudioContext();
+		this.el.emit('sound-play');
+	},
+
+	onPauseSound() {
+		this.el.emit('sound-pause');
+	},
+
+	onLoadSound() {
+		this.el.emit('sound-loaded');
+	},
+
+	onEndSound() {
+		if (this.audio && this.audio.source) {
+			this.onPauseSound();
+			this.audio.source.removeEventListener('ended', this.onEndSound);
+		}
+		this.el.emit('sound-ended');
 	},
 
 	/**
