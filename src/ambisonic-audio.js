@@ -16,9 +16,15 @@ function setBooleanAttribute(element, attr, value) {
 	}
 }
 
+const MIN_ORDER = 1;
+const MAX_ORDER = 3;
 const isSafari = false;// /safari/i.test(Omnitone.browserInfo.name);
 const isIOS = false;// /iP(ad|od|hone)/.test(Omnitone.browserInfo.platform);
 const safariChannelMap = ([w, x, y, z]) => [y, w, x, z];
+
+function setRotationMatrixFromCamera(renderer, camera) {
+	renderer.setRotationMatrix4(camera.matrixWorldInverse.elements);
+}
 
 const boundMethods = [
 	'setCamera',
@@ -32,10 +38,11 @@ const boundMethods = [
 AFRAME.registerComponent('ambisonic', {
 	schema: {
 		src: { type: 'audio' },
+		sources: { type: 'array', default: [] },
 		loop: { type: 'boolean', default: true },
 		autoplay: { type: 'boolean', default: false },
 		useMediaElement: { type: 'boolean', default: true },
-		channels: { type: 'number', default: 4 }, // todo: change to 'order'?
+		order: { type: 'number', default: 1 },
 		channelMap: { type: 'array', default: [0, 1, 2, 3] },
 		mode: {
 			default: 'ambisonic',
@@ -52,8 +59,8 @@ AFRAME.registerComponent('ambisonic', {
 		this.renderer = null;
 		this.audio = null;
 		this.mediaElement = null;
-		this.audioSource = '';
-		this.loader = null;
+		this.audioSources = [];
+		this.loading = false;
 
 		this.ownMediaElement = false;
 		this.playing = false;
@@ -83,10 +90,16 @@ AFRAME.registerComponent('ambisonic', {
 		// if context changed, then need to rebuild omnitone instance
 		// todo: rebuild if type of Omnitone renderer (order) changed
 		const {
-			channels,
-			useMediaElement,
-			src
+			order,
+			src,
+			sources
 		} = this.data;
+
+		const orderPlus1 = order + 1;
+		const channels = orderPlus1 * orderPlus1;
+		const useMediaElement = this.data.useMediaElement &&
+			(!sources || !(sources.length >= 2));
+
 		const rebuildOmnitone = context !== this.context ||
 			!this.renderer ||
 			this.renderer.input.channelCount > 4 !== channels >= 4;
@@ -105,7 +118,8 @@ AFRAME.registerComponent('ambisonic', {
 				Omnitone.createFOARenderer :
 				Omnitone.createHOARenderer;
 
-			const renderer = this.renderer = createRenderer(this.context);
+			const renderer = this.renderer = createRenderer(this.context, { ambisonicOrder: order });
+
 			renderer.initialize().then(() => {
 				if (renderer !== this.renderer || context !== this.context) {
 					// things changed while we were initializing so abort
@@ -127,7 +141,8 @@ AFRAME.registerComponent('ambisonic', {
 
 		const rebuildSound = rebuildOmnitone ||
 			!!oldData.useMediaElement !== !!useMediaElement ||
-			oldData.src !== src;
+			oldData.src !== src ||
+			JSON.stringify(oldData.sources) !== JSON.stringify(sources);
 
 		if (rebuildSound) {
 			if (useMediaElement) {
@@ -161,7 +176,7 @@ AFRAME.registerComponent('ambisonic', {
 					};
 				}
 				this.mediaElement = newMediaElement;
-				this.audioSource = '';
+				this.audioSources = [];
 				this.audio.setMediaElementSource(this.mediaElement);
 			} else {
 				// load audio buffer
@@ -174,7 +189,11 @@ AFRAME.registerComponent('ambisonic', {
 					url = src.src || src.srcObject || src.currentSrc;
 				}
 
-				this.audioSource = url;
+				if (sources && sources.length) {
+					this.audioSources = sources;
+				} else {
+					this.audioSources = [url];
+				}
 				this.cleanMediaAssets();
 				if (this.data.autoplay) {
 					this.loadBuffer();
@@ -188,7 +207,7 @@ AFRAME.registerComponent('ambisonic', {
 
 	tick() {
 		if (this.renderer && this.camera) {
-			this.renderer.setRotationMatrixFromCamera(this.camera.matrixWorld);
+			setRotationMatrixFromCamera(this.renderer, this.camera);
 		}
 	},
 
@@ -228,9 +247,9 @@ AFRAME.registerComponent('ambisonic', {
 			this.audio.buffer = null;
 			this.audio.sourceType = 'empty';
 		}
-		if (this.loader) {
-			this.loader.abort();
-			this.loader = null;
+		if (this.loading) {
+			// todo: find a way to abort loader
+			this.loading = false;
 		}
 	},
 
@@ -260,16 +279,16 @@ AFRAME.registerComponent('ambisonic', {
 
 	loadBuffer() {
 		this.resumeAudioContext().then(() => {
-			const url = this.audioSource;
-			if (this.loader || !url) {
+			if (this.loading || !this.audioSources.length) {
 				return;
 			}
 
-			const loader = this.loader = new XMLHttpRequest();
-			loader.responseType = 'arraybuffer';
-			loader.onload = () => {
-				this.context.decodeAudioData(loader.response, audioBuffer => {
-					if (this.audioSource === url && !this.data.useMediaElement) {
+			this.loading = true;
+			const sources = JSON.stringify(this.audioSources);
+			Omnitone.createBufferList(this.context, this.audioSources)
+				.then(results => {
+					const audioBuffer = Omnitone.mergeBufferListByChannel(this.context, results);
+					if (!this.data.useMediaElement && sources === JSON.stringify(this.audioSources)) {
 						this.audio.setBuffer(audioBuffer);
 						this.onLoadSound();
 						this.updatePlaybackSettings();
@@ -277,17 +296,10 @@ AFRAME.registerComponent('ambisonic', {
 							this.playSound();
 						}
 					}
-				}, error => {
-					this.loader = null;
-					warn('Unable to decode audio source', url, error);
+				})
+				.catch(error => {
+					warn('Unable to decode audio source', this.audioSources, error);
 				});
-			};
-			loader.onerror = evt => {
-				this.loader = null;
-				warn('Unable to load audio source', url, evt, loader);
-			};
-			loader.open('GET', url);
-			loader.send();
 		});
 	},
 
@@ -359,20 +371,24 @@ AFRAME.registerComponent('ambisonic', {
 		if (this.renderer) {
 			const channelMap = this.data.channelMap.map(parseFloat);
 
-			/*
-			Per various documents on the internet, Safari messes up the
-			order of the channels, but that does not seem to be the case.
-			Maybe it's been fixed in a recent version, so this is disabled
-			for now.
-			*/
-			this.renderer.setChannelMap(
-				channelMap.length === 4 && isSafari ?
-					safariChannelMap(channelMap) :
-					channelMap
-			);
+			if (this.renderer.setChannelMap) {
+				/*
+				Per various documents on the internet, Safari messes up the
+				order of the channels, but that does not seem to be the case.
+				Maybe it's been fixed in a recent version, so this is disabled
+				for now.
+				*/
+				this.renderer.setChannelMap(
+					channelMap.length === 4 && isSafari ?
+						safariChannelMap(channelMap) :
+						channelMap
+				);
+			}
 
 			// Mobile Safari cannot decode all the audio channels from a media element
-			const renderingMode = isIOS && this.data.mode === 'ambisonic' ?
+			const { order, mode } = this.data;
+			const validOrder = order >= MIN_ORDER && order <= MAX_ORDER;
+			const renderingMode = (isIOS || !validOrder) && mode === 'ambisonic' ?
 				'bypass' :
 				this.data.mode;
 			this.renderer.setRenderingMode(renderingMode);
@@ -429,8 +445,10 @@ AFRAME.registerPrimitive('a-ambisonic', {
 	},
 	mappings: {
 		src: 'ambisonic.src',
+		sources: 'ambisonic.sources',
 		loop: 'ambisonic.loop',
 		autoplay: 'ambisonic.autoplay',
+		order: 'ambisonic.order',
 		'use-media-element': 'ambisonic.useMediaElement',
 		'channel-map': 'ambisonic.channelMap',
 		mode: 'ambisonic.mode'
