@@ -35,7 +35,7 @@ AFRAME.registerComponent('ambisonic', {
 		loop: { type: 'boolean', default: true },
 		autoplay: { type: 'boolean', default: false },
 		useMediaElement: { type: 'boolean', default: true },
-		channels: { type: 'number', default: 4 }, // todo: change to 'order'?
+		channels: { type: 'number', default: 4 }, // todo: change to 'order'
 		channelMap: { type: 'array', default: [0, 1, 2, 3] },
 		mode: {
 			default: 'ambisonic',
@@ -76,7 +76,7 @@ AFRAME.registerComponent('ambisonic', {
 		const listener = sceneEl.audioListener;
 		const context = listener && listener.context || this.context || THREE.AudioContext.getContext();
 
-		// Wait for camera if necessary. todo: remove this later
+		// Wait for camera if necessary.
 		this.camera = sceneEl.camera || null;
 		sceneEl.addEventListener('camera-set-active', this.setCamera);
 
