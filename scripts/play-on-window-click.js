@@ -13,13 +13,15 @@ AFRAME.registerComponent('play-on-window-click', {
 	},
 	onClick: function () {
 		var components = this.el.components;
+		var image;
+
 		if (components.ambisonic) {
 			components.ambisonic.playSound();
 		} else if (components.sound) {
 			components.sound.playSound();
 		} else if (components.material) {
 			try {
-				var image = components.material.material.map.image;
+				image = components.material.material.map.image;
 				image.play();
 			} catch (e) {}
 		}
