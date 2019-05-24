@@ -11,10 +11,12 @@ Built on [Omnitone](https://github.com/GoogleChrome/omnitone).
 
 | Property | Description | Default Value | Values |
 | -------- | ----------- | ------------- | ------ |
-| `src`    | The source of the audio. This can be a [HTMLMediaElement] (`<audio />` or `<video />`), an ID string pointing to a [HTMLMediaElement] or a resouce string. | |
+| `src`    | The source of the audio. This can be an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) (`<audio />` or `<video />`), an ID string pointing to an HTMLMediaElement or a resouce string. | |
 | `loop` | Whether to loop the element source. Overwrites the value set by the input element. | true | |
+| `useMediaElement` | Whether to use a media element (required for video). Alternatively, load from source as an [audio buffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer). | true | |
 | `autoplay` | Whether to autoplay the element source. Overwrites the value set by the input element. | true | |
 | `mode` | Audio rendering mode | `ambisonic` | [oneOf(`ambisonic`, `bypass`, `off`)] |
+| `channelMap` | Ordering of [ambisonic component channels](https://en.wikipedia.org/wiki/Ambisonic_data_exchange_formats#Component_ordering) | `[0, 1, 2, 3` | Array of integers (0-3) |
 
 ### Installation
 
