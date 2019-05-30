@@ -8,8 +8,5 @@ module.exports = Object.assign({}, eslintConfig, {
 	},
 	rules: Object.assign(eslintConfig.rules, {
 		'no-invalid-this': 0
-	}),
-	globals: {
-		DEBUG: 'readonly'
-	}
+	})
 });

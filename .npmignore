@@ -1,11 +1,14 @@
-.git
+**/.DS_Store
 .github
 config
 examples
 tests
-gh-pages
+node_modules
+babel.config.js
+gh-pages*
 .editorconfig
 .eslintrc.js
+.eslintignore
 .gitattributes
 .gitignore
 .mailmap

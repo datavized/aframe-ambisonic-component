@@ -2,7 +2,8 @@
 	"name": "aframe-ambisonic-component",
 	"version": "0.1.0",
 	"description": "A Ambisonic Audio component for A-Frame.",
-	"main": "src/index.js",
+	"main": "dist/index.js",
+	"module": "src/index.js",
 	"unpkg": "build/aframe-ambisonic-component.min.js",
 	"repository": {
 		"type": "git",
@@ -27,7 +28,7 @@
 	"homepage": "https://github.com/datavized/aframe-ambisonic-component#readme",
 	"scripts": {
 		"start": "webpack-dev-server --config ./config/webpack-dev.js --mode development --progress --colors",
-		"build": "rm -rf build/ && webpack --config ./config/webpack-prod.js --mode production && webpack --config ./config/webpack-prod-no-omnitone.js --mode production",
+		"build": "rm -rf build/ && webpack --config ./config/webpack-prod.js --mode production && webpack --config ./config/webpack-prod-no-omnitone.js --mode production && webpack --config ./config/webpack-npm.js --mode production",
 		"deploy": "./gh-pages.sh",
 		"lint": "eslint ./; true",
 		"lint-fix": "eslint --fix ./; true",
@@ -58,6 +59,7 @@
 		"webpack": "^4.32.2",
 		"webpack-cli": "^3.3.2",
 		"webpack-dev-server": "^3.4.1",
-		"webpack-merge": "^4.2.1"
+		"webpack-merge": "^4.2.1",
+		"webpack-node-externals": "^1.7.2"
 	}
 }

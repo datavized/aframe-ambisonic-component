@@ -1,10 +1,9 @@
-/* global DEBUG */
-import * as AFRAME from 'aframe';
-import * as THREE from 'three';
-import Omnitone from 'omnitone';
-
-const log = AFRAME.utils.debug('components:ambisonic:info');
-const warn = AFRAME.utils.debug('components:ambisonic:warn');
+import Omnitone from 'omnitone/build/omnitone.esm';
+// import * as AFRAME from 'aframe';
+// import * as THREE from 'three';
+const AFRAME = window.AFRAME;
+const THREE = window.THREE; // imported by aframe
+import { log, warn } from './log';
 
 function setBooleanAttribute(element, attr, value) {
 	if (element) {
@@ -152,7 +151,7 @@ AFRAME.registerComponent('ambisonic', {
 					newMediaElement.addEventListener('ended', this.onEndSound);
 				}
 
-				if (DEBUG && !this.mediaElement && newMediaElement && this.ownMediaElement) {
+				if (!this.mediaElement && newMediaElement && this.ownMediaElement) {
 					newMediaElement.onerror = evt => {
 						warn('Error loading audio', src, evt);
 					};
