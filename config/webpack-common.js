@@ -20,11 +20,11 @@ module.exports = {
 				exclude: /node_modules/,
 				enforce: 'pre',
 				loader: 'eslint-loader',
-				options: Object.assign({}, eslintConfig, {
+				options: {
 					// formatter: eslintFormatter,
 					// failOnHint: env === 'production',
 					emitWarning: true
-				})
+				}
 			},
 			{
 				test: /\.js$/,
