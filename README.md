@@ -22,7 +22,7 @@ Built on [Omnitone](https://github.com/GoogleChrome/omnitone).
 
 #### Browser
 
-Install and use by directly including the [browser files](build):
+Install and use by directly including the script compiled for the browser:
 
 ```html
 <head>
