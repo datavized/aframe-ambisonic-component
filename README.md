@@ -28,7 +28,7 @@ Install and use by directly including the [browser files](build):
 <head>
   <title>My A-Frame Scene</title>
   <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
-  <script src="https://unpkg.com/aframe-ambisonic-component/dist/aframe-ambisonic-component.min.js"></script>
+  <script src="https://unpkg.com/aframe-ambisonic-component"></script>
 </head>
 
 <body>
