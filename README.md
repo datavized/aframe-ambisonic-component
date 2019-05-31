@@ -44,7 +44,7 @@ Install and use by directly including the [browser files](build):
 If you already have Omnitone loaded or if you're using another component that loads Omnitone (e.g. [aframe-resonance-audio-component](https://github.com/digaverse/aframe-resonance-audio-component)), there is a much smaller version of the script that does not include Omnitone.
 
 ```html
-<script src="https://unpkg.com/aframe-ambisonic-component/dist/aframe-ambisonic-component-no-omnitone.min.js"></script>
+<script src="https://unpkg.com/aframe-ambisonic-component/build/aframe-ambisonic-component-no-omnitone.min.js"></script>
 ```
 
 #### npm
