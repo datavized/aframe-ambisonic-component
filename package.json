@@ -58,7 +58,7 @@
 		"fast-async": "^6.3.8",
 		"webpack": "^4.33.0",
 		"webpack-cli": "^3.3.2",
-		"webpack-dev-server": "^3.6.0",
+		"webpack-dev-server": "^3.7.0",
 		"webpack-merge": "^4.2.1",
 		"webpack-node-externals": "^1.7.2"
 	}
