@@ -2,12 +2,13 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Beach Scene | A-Frame Ambisonic Audio Component</title>
+		<title>Higher Order Ambisonics | A-Frame Ambisonic Audio Component</title>
 		<script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
 		<script src="../aframe-ambisonic-component.js"></script>
 		<script src="../scripts/play-on-window-click.js"></script>
 		<script src="../scripts/hide-once-playing.js"></script>
 		<script src="../scripts/play-on-vrdisplayactivate-or-enter-vr.js"></script>
+		<script src="../scripts/environment.js"></script>
 		<style>
 			body {
 				font-family: 'Lucida Sans', 'Lucida Sans Regular',
@@ -31,31 +32,53 @@
 		</style>
 	</head>
 	<body>
-		<a-scene>
-			<a-assets>
-				<audio id="audio" src="../assets/audio/beach-ambisonic.mp4"></audio>
-				<a-asset-item id="beach" src="../assets/models/beach/beach.glb"></a-asset-item>
-			</a-assets>
-
-			<a-entity light="type: directional; color: hsl(36, 100%, 95%); intensity: 1" position="-1 1.75 1"></a-entity>
-			<a-entity light="type: hemisphere; color: hsl(216, 100%, 60%); groundColor: hsl(34, 100%, 75%); intensity: 0.6" position="0 50 0"></a-entity>
-
-			<a-entity gltf-model="#beach" rotation="0 -90 0"></a-entity>
-
+		<a-scene id="scene">
 			<a-ambisonic
 				id="ambisonic"
-				src="#audio"
+				sources="../assets/audio/HOA3_rec2_01-08ch.ogg, ../assets/audio/HOA3_rec2_09-16ch.ogg"
+				order="3"
 				play-on-window-click
 				play-on-vrdisplayactivate-or-enter-vr
-				channel-map="FuMa"
 			></a-ambisonic>
 
-			<a-camera>
+
+			<a-entity environment="preset:forest;dressing1OnPlayArea:0"></a-entity>
+			<script>
+				[
+					'Front',
+					'Front Right',
+					'Right',
+					'Back Right',
+					'Back',
+					'Back Left',
+					'Left',
+					'Front Left'
+				].forEach(function (direction, i) {
+					var entity = document.createElement('a-entity');
+					entity.setAttribute('text', {
+						align: 'center',
+						width: 5,
+						wrapCount: 100,
+						color: 'white'
+					});
+					entity.setAttribute('text', 'value', direction);
+
+					var angle = i * Math.PI * 2 / 8;
+					var x = Math.sin(angle) * 3;
+					var z = -Math.cos(angle) * 3;
+					entity.setAttribute('position', [x, 1.5, z].join(' '));
+					entity.setAttribute('rotation', [0, -angle * 180 / Math.PI, 0].join(' '));
+					document.getElementById('scene').appendChild(entity);
+				});
+			</script>
+
+
+			<a-camera look-controls="pointerLockEnabled:true">
 				<!-- Text element for display messaging.  Hide once audio is playing. -->
 				<a-entity id="msg" position="0 -0.3 -1.5" text="align:center; 
 					width:3;
 					wrapCount:100;
-					color:black;
+					color:white;
 					value:Click window to make audio play."
 					hide-once-playing="#ambisonic">
 				</a-entity>
@@ -63,11 +86,10 @@
 		</a-scene>
 
 		<div id="model-reference">
-			3D Model:
 			<a
-				href="https://poly.google.com/view/2AeF-fuFHNu"
+				href="https://github.com/supermedium/aframe-environment-component"
 				target="_blank"
-				>Little Private Beach by Carson Lam (CC-BY)</a
+				>Aframe Environment Component</a
 			>
 		</div>
 
