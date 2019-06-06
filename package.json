@@ -1,6 +1,6 @@
 {
 	"name": "aframe-ambisonic-component",
-	"version": "0.1.1",
+	"version": "0.2.0",
 	"description": "A Ambisonic Audio component for A-Frame.",
 	"main": "dist/index.js",
 	"module": "src/index.js",
