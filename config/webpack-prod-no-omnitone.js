@@ -6,6 +6,7 @@ module.exports = merge(config, {
 		filename: 'aframe-ambisonic-component-no-omnitone.min.js'
 	},
 	externals: {
-		omnitone: 'Omnitone'
+		omnitone: 'Omnitone',
+		'omnitone/build/omnitone.esm': 'Omnitone'
 	}
 });
