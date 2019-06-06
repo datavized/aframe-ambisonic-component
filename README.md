@@ -12,11 +12,15 @@ Built on [Omnitone](https://github.com/GoogleChrome/omnitone).
 | Property | Description | Default Value | Values |
 | -------- | ----------- | ------------- | ------ |
 | `src`    | The source of the audio. This can be an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) (`<audio />` or `<video />`), an ID string pointing to an HTMLMediaElement or a resouce string. | |
+| `sources` | Load multiple audio files<sup>[1](#sources-footnote)</sup>. Overrides `src`. | | Array of URL strings |
 | `loop` | Whether to loop the element source. Overwrites the value set by the input element. | true | |
 | `useMediaElement` | Whether to use a media element (required for video). Alternatively, load from source as an [audio buffer](https://developer.mozilla.org/en-US/docs/Web/API/AudioBuffer). | true | |
 | `autoplay` | Whether to autoplay the element source. Overwrites the value set by the input element. | true | |
 | `mode` | Audio rendering mode | `ambisonic` | [oneOf(`ambisonic`, `bypass`, `off`)] |
-| `channelMap` | Ordering of [ambisonic component channels](https://en.wikipedia.org/wiki/Ambisonic_data_exchange_formats#Component_ordering) | `[0, 1, 2, 3` | Array of integers (0-3) |
+| `order` | Order of ambisonic rendering | 1 | 1, 2 or 3 |
+| `channelMap` | Ordering of [ambisonic component channels](https://en.wikipedia.org/wiki/Ambisonic_data_exchange_formats#Component_ordering) | `ACN` | [oneOf([`ACN`](https://en.wikipedia.org/wiki/Ambisonic_data_exchange_formats#ACN "Ambisonic Channel Number")), [`FuMa`](https://en.wikipedia.org/wiki/Ambisonic_data_exchange_formats#Furse-Malham "Furse-Malham"), [`SID`](https://en.wikipedia.org/wiki/Ambisonic_data_exchange_formats#SID "Single Index Designation")] or Array of integers |
+
+<a name="sources-footnote">1</a>: Higher-order ambisonic audio requires 9 or 16 channels, but most browsers can only decode 8 channels at a time. So it is necessary to split the audio file into two: each with no more than 8 channels. See Higher Order Ambisonics example.
 
 ### Installation
 

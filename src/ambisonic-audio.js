@@ -25,6 +25,11 @@ function setRotationMatrixFromCamera(renderer, camera) {
 	renderer.setRotationMatrix4(camera.matrixWorldInverse.elements);
 }
 
+function channelCount(order) {
+	const orderPlus1 = order + 1;
+	return orderPlus1 * orderPlus1;
+}
+
 const boundMethods = [
 	'setCamera',
 	'onEntityChange',
@@ -34,6 +39,23 @@ const boundMethods = [
 	'onEndSound'
 ];
 
+const channelMapSchemes = {
+	// acn: n => n,
+	sid: [
+		0,  3,  1,  2,
+		8,  4,  7,  5,
+		6, 15,  9, 14,
+		10, 13, 11, 12
+	],
+	fuma: [
+		0,  3,  1,  2,
+		6,  7,  5,  8,
+		4, 12, 13, 11,
+		14, 10, 15,  9
+	]
+};
+const intArrayRegex = /^([0-9]+)(\s*,\s*([0-9]+))*$/;
+
 AFRAME.registerComponent('ambisonic', {
 	schema: {
 		src: { type: 'audio' },
@@ -42,7 +64,29 @@ AFRAME.registerComponent('ambisonic', {
 		autoplay: { type: 'boolean', default: false },
 		useMediaElement: { type: 'boolean', default: true },
 		order: { type: 'number', default: 1 },
-		channelMap: { type: 'array', default: [0, 1, 2, 3] },
+		channelMap: {
+			parse: str => {
+				if (typeof str === 'string') {
+					str = str.trim().toLowerCase();
+				}
+				if (channelMapSchemes[str]) {
+					return channelMapSchemes[str];
+				}
+
+				if (intArrayRegex.test(str)) {
+					return str.split(',').map(parseFloat);
+				}
+
+				return [];
+			},
+			stringify: value => {
+				if (Array.isArray(value)) {
+					return value.join(', ');
+				}
+				return value;
+			},
+			default: 'ACN'
+		},
 		mode: {
 			default: 'ambisonic',
 			oneOf: [
@@ -94,8 +138,7 @@ AFRAME.registerComponent('ambisonic', {
 			sources
 		} = this.data;
 
-		const orderPlus1 = order + 1;
-		const channels = orderPlus1 * orderPlus1;
+		const channels = channelCount(order);
 		const useMediaElement = this.data.useMediaElement &&
 			(!sources || !(sources.length >= 2));
 
@@ -287,7 +330,8 @@ AFRAME.registerComponent('ambisonic', {
 			Omnitone.createBufferList(this.context, this.audioSources)
 				.then(results => {
 					const audioBuffer = Omnitone.mergeBufferListByChannel(this.context, results);
-					if (!this.data.useMediaElement && sources === JSON.stringify(this.audioSources)) {
+					const useMediaElement = this.data.useMediaElement && (!sources || !(sources.length >= 2));
+					if (!useMediaElement && sources === JSON.stringify(this.audioSources)) {
 						this.audio.setBuffer(audioBuffer);
 						this.onLoadSound();
 						this.updatePlaybackSettings();
@@ -368,9 +412,16 @@ AFRAME.registerComponent('ambisonic', {
 	*/
 	updateAmbisonicSettings() {
 		if (this.renderer) {
-			const channelMap = this.data.channelMap.map(parseFloat);
-
 			if (this.renderer.setChannelMap) {
+				const channelMap = this.data.channelMap.slice(0);
+
+				// fill in any missing channel map values in case they're left out
+				const channels = channelCount(this.data.order);
+				for (let i = channelMap.length; i < channels; i++) {
+					channelMap[i] = i;
+				}
+				channelMap.length = channels;
+
 				/*
 				Per various documents on the internet, Safari messes up the
 				order of the channels, but that does not seem to be the case.
