@@ -11,7 +11,7 @@ AFRAME.registerComponent('hide-once-playing', {
 	update: function (oldData) {
 		var mediaElement;
 		var data = this.data;
-		if (data.components && data.components.ambisonic) {
+		if (data && data.components && data.components.ambisonic) {
 			this.removeEvents(oldData);
 			this.addEvents();
 		} else if (data) {
