@@ -192,8 +192,8 @@ AFRAME.registerComponent('ambisonic', {
 				if (src instanceof window.HTMLMediaElement) {
 					newMediaElement = src;
 					this.ownMediaElement = false;
-				} else {
-					newMediaElement = this.mediaElement || document.createElement('audio');
+				} else if (src) {
+					newMediaElement = document.createElement('audio');
 					newMediaElement.src = src;
 					// this.mediaElement.load();
 					this.ownMediaElement = true;
@@ -219,7 +219,11 @@ AFRAME.registerComponent('ambisonic', {
 				}
 				this.mediaElement = newMediaElement;
 				this.audioSources = [];
-				this.audio.setMediaElementSource(this.mediaElement);
+				if (this.mediaElement) {
+					this.audio.setMediaElementSource(this.mediaElement);
+				} else if (this.audio.source) {
+					this.audio.disconnect();
+				}
 			} else {
 				// load audio buffer
 
