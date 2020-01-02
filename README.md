@@ -31,7 +31,7 @@ Install and use by directly including the script compiled for the browser:
 ```html
 <head>
   <title>My A-Frame Scene</title>
-  <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.0.3/aframe.min.js"></script>
   <script src="https://unpkg.com/aframe-ambisonic-component"></script>
 </head>
 
