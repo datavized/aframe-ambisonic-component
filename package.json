@@ -56,7 +56,7 @@
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-promise": "^4.2.1",
 		"fast-async": "^6.3.8",
-		"webpack": "^4.44.1",
+		"webpack": "^5.97.1",
 		"webpack-cli": "^3.3.12",
 		"webpack-dev-server": "^3.11.0",
 		"webpack-merge": "^4.2.2",
